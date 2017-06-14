@@ -1,0 +1,7 @@
+base digilenthackster
+author Andrew Holzer
+email aholzer@digilentinc.com
+date 05-2017
+name Digilent Product Projects
+desc Display all projects that use a Digilent Projuct
+url www.reference.digilentinc.com/try-waveforms
