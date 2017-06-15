@@ -82,36 +82,6 @@ class syntax_plugin_digilenthackster extends DokuWiki_Syntax_Plugin
 
 		return false;
 	}
-
-	/*
-		Expects an object with a member named type. From that, this builds some HTML
-		element that displays critical information to whomever is viewing the wiki page.
-
-		The error can contain other members, such as http_code in the case of an
-		http_response_error. Some way to intelligently handle this should be devised
-		in a later update to the code.
-
-		Returns the completed html string.
-	*/
-	function buildHTMLfromError($error) { // note: this could probably be cleaned up for later, adding modularity for further upgrades, but this works for now
-		$output = '';
-
-		switch($error->type) {
-			case 'curl_exec_error': // Pretty sure this only happens when there are errors with curl itself, or there were issues establishing connection.
-				$output = 'There was an error executing the script. Contact the plugin manager.'; // where did this fail? And do I really want to be contacted?
-				break;
-			case 'html_response_error': // so much can happen here...
-				$output = 'HTTP response: ' . $error->http_code;
-			case 'product_id_not_found_error':
-				$output = 'No products were found on Hackster that matched the given name. Did you enter the correct name?';
-				break;
-			case 'no_projects_found_error':
-				$output = 'There are no projects found. Be the first to post one!'; // link to the product page
-				break;
-		}
-
-		return $output;
-	}
 	
 	function handle($match, $state, $pos, &$handler) 
 	{	
@@ -155,7 +125,7 @@ class syntax_plugin_digilenthackster extends DokuWiki_Syntax_Plugin
 							}
 
 							$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-							if ($http_code !== 200) { // Really, if the error is 400 or above should create the error
+							if ($http_code !== 200) {
 								// there was some sort of error on our part or the server's. Include http code in error
 								$this->error = new HTTPResponseError($http_code);
 								break;
@@ -199,7 +169,8 @@ class syntax_plugin_digilenthackster extends DokuWiki_Syntax_Plugin
 
 						if (count($result->records) > 0) { // we only fetch the first page, but could get more if wanted
 							foreach($result->records as $project) {
-								$this->projects[] = $project->name;
+								$this->projects[] = array('name' => $project->name,
+									'url' => $project->url);
 							}
 						}
 						else {
@@ -226,8 +197,8 @@ class syntax_plugin_digilenthackster extends DokuWiki_Syntax_Plugin
 				} else {
 					// iterate through $projects list and assemble the entries as list items
 					$output = "Projects<ul>";
-					foreach($this->projects as $name) {
-						$output .= "<li>" . $name . "</li>";
+					foreach($this->projects as $project) {
+						$output .= '<li><a href="' . $project['url'] . '">' . $project['name'] . '</a></li>';
 					}
 					$output .= "</ul>";
 				}
