@@ -198,6 +198,7 @@ class syntax_plugin_digilenthackster extends DokuWiki_Syntax_Plugin
 					// iterate through $projects list and assemble the entries as list items
 					$output = "Projects<ul>";
 					foreach($this->projects as $project) {
+						$project['url'] = str_replace('www.hackster.io', 'projects.digilentinc.com', $project['url']);
 						$output .= '<li><a href="' . $project['url'] . '">' . $project['name'] . '</a></li>';
 					}
 					$output .= "</ul>";
